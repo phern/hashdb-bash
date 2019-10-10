@@ -1,0 +1,201 @@
+#!/bin/bash
+
+arg1=$1
+numargs=$#
+
+make_hashes () {
+
+	#hash user settings
+	md5sum ~/.bash_profile > ~/md5sum.txt
+	md5sum ~/.gtkrc >>~/md5sum.txt
+	md5sum ~/.login >>~/md5sum.txt
+	md5sum ~/.logout >> ~/md5sum.txt
+	md5sum ~/.profile >>~/md5sum.txt
+	md5sum ~/.viminfo >> ~/md5sum.txt
+	md5sum ~/.wm_style >> ~/md5sum.txt
+	md5sum ~/.Xdefaults >> ~/md5sum.txt
+	md5sum ~/.Xresources >> ~/md5sum.txt
+	md5sum ~/.xinitrc >> ~/md5sum.txt
+	md5sum ~/.xsession >> ~/md5sum.txt
+
+	#hash devices
+	md5sum /dev/fd0 >> ~/md5sum.txt
+	md5sum /dev/hda >> ~/md5sum.txt
+	md5sum /dev/hdc >> ~/md5sum.txt
+	md5sum /dev/null >> ~/md5sum.txt
+
+	#hash configs
+	md5sum /etc/aliases >> ~/md5sum.txt
+	md5sum /etc/bashrc >> ~/md5sum.txt
+	md5sum /etc/crontab >> ~/md5sum.txt
+	md5sum /etc/exports >> ~/md5sum.txt
+	md5sum /etc/fstab >> ~/md5sum.txt
+	md5sum /etc/group >> ~/md5sum.txt
+	md5sum /etc/grub.conf >> ~/md5sum.txt
+	md5sum /etc/hosts >> ~/md5sum.txt
+	md5sum /etc/hosts.allow >> ~/md5sum.txt
+	md5sum /etc/hosts.deny >> ~/md5sum.txt
+	md5sum /etc/inittab >> ~/md5sum.txt
+	md5sum /etc/issue >> ~/md5sum.txt
+	md5sum /etc/lilo.conf >> ~/md5sum.txt
+	md5sum /etc/modules.conf >> ~/md5sum.txt
+	md5sum /etc/mtab >> ~/md5sum.txt
+	md5sum /etc/passwd >> ~/md5sum.txt
+	md5sum /etc/printcap >> ~/md5sum.txt
+	md5sum /etc/profile >> ~/md5sum.txt
+	md5sum /etc/resolv.conf >> ~/md5sum.txt
+	md5sum /etc/securetty >> ~/md5sum.txt
+	md5sum /etc/termcap >> ~/md5sum.txt
+
+} 
+
+
+make_sha_hashes () {
+
+	#hash user settings
+	sha256sum ~/.bash_profile > ~/sha256.txt
+	sha256sum ~/.gtkrc >>~/sha256.txt
+	sha256sum ~/.login >>~/sha256.txt
+	sha256sum ~/.logout >> ~/sha256.txt
+	sha256sum ~/.profile >>~/sha256.txt
+	sha256sum ~/.viminfo >> ~/sha256.txt
+	sha256sum ~/.wm_style >> ~/sha256.txt
+	sha256sum ~/.Xdefaults >> ~/sha256.txt
+	sha256sum ~/.Xresources >> ~/sha256.txt
+	sha256sum ~/.xinitrc >> ~/sha256.txt
+	sha256sum ~/.xsession >> ~/sha256.txt
+
+
+	#hash devices
+	sha256sum /dev/fd0 >> ~/sha256.txt
+	sha256sum /dev/hda >> ~/sha256.txt
+	sha256sum /dev/hdc >> ~/sha256.txt
+	sha256sum /dev/null >> ~/sha256.txt
+
+	#hash configs
+	sha256sum /etc/aliases >> ~/sha256.txt
+	sha256sum /etc/bashrc >> ~/sha256.txt
+	sha256sum /etc/crontab >> ~/sha256.txt
+	sha256sum /etc/exports >> ~/sha256.txt
+	sha256sum /etc/fstab >> ~/sha256.txt
+	sha256sum /etc/group >> ~/sha256.txt
+	sha256sum /etc/grub.conf >> ~/sha256.txt
+	sha256sum /etc/hosts >> ~/sha256.txt
+	sha256sum /etc/hosts.allow >> ~/sha256.txt
+	sha256sum /etc/hosts.deny >> ~/sha256.txt
+	sha256sum /etc/inittab >> ~/sha256.txt
+	sha256sum /etc/issue >> ~/sha256.txt
+	sha256sum /etc/lilo.conf >> ~/sha256.txt
+	sha256sum /etc/modules.conf >> ~/sha256.txt
+	sha256sum /etc/mtab >> ~/sha256.txt
+	sha256sum /etc/passwd >> ~/sha256.txt
+	sha256sum /etc/printcap >> ~/sha256.txt
+	sha256sum /etc/profile >> ~/sha256.txt
+	sha256sum /etc/resolv.conf >> ~/sha256.txt
+	sha256sum /etc/securetty >> ~/sha256.txt
+	sha256sum /etc/termcap >> ~/sha256.txt
+
+}
+
+
+#function corresponding to -help arg
+help_function () {
+	_helpmessage="
+-------------HASH COMPARE-------------
+> Generates md5/sha for the most     <
+> important files of the system.     <
+> If no hash database is found then  <
+> a new one will be created.         <
+>--------------OPTIONS---------------<
+> hashcompare -g                     <
+> \_Overwrites old hash database and <
+>   \_generates a new one.           <
+>                                    <
+> hashcompare -help                  <
+> \_Brings up this help dialogue.    <
+>   \_Who woulda thought.            <
+>                                    <
+> hashcompare -md5                   <
+> \_Generates and/or compares only   <
+>   \_md5 hash databases.            <
+>                                    <
+> hashcompare -sha256                <
+> \_Generates and/or compares only   <
+>   \_sha256 hash databases.         <
+>------------------------------------<"
+echo "$_helpmessage"
+}
+
+#Check if sha256 database exists and if not, generates the database
+check_if_sha_exists () {
+	if ! [ -e ~/sha256.txt ] ; then
+		make_sha_hashes
+	else 
+		echo '---------SHA HASHES----------'
+		sha256sum -c ~/sha256.txt
+		echo '-----------------------------'
+	fi
+}
+
+
+#Check if md5 database exists and if not, generates the database
+check_if_md5_exists () {
+	if ! [ -e ~/md5sum.txt ] ; then
+		make_hashes
+	else
+		echo '---------MD5 HASHES----------'
+		md5sum -c ~/md5sum.txt
+		echo '-----------------------------'
+	fi
+}
+
+
+#Remove old hash file and generate a new hash. 
+gen_new_hash () {
+	rm ~/md5sum.txt
+	make_hashes
+	rm ~/sha256.txt
+	make_sha_hashes
+}
+
+
+#Argument handling.
+arg_check () {
+	if [ "$arg1" == "-help" ] ; then
+		help_function
+	elif [ "$arg1" == "-g" ] ; then
+		gen_new_hash
+		echo "New database created"
+	elif [ "$arg1" == "-md5" ] ; then
+		check_if_md5_exists
+	elif [ "$arg1" == "-sha256" ] ; then
+		check_if_sha_exists		
+	elif [ "$numargs" -eq "0" ] ; then
+		check_if_md5_exists
+		check_if_sha_exists	
+	else 
+		echo 'Try -help'
+		exit 1
+	fi
+}
+
+
+arg_check
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
